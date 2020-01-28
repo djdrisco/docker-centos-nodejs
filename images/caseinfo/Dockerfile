@@ -14,6 +14,8 @@ fast, scalable network applications. Node.js uses an event-driven, non-blocking 
 that makes it lightweight and efficient, perfect for data-intensive real-time applications \
 that run across distributed devices."
 
+#ENV PORT=8000
+
 LABEL summary="$SUMMARY" \
       description="$DESCRIPTION" \
       io.k8s.description="$DESCRIPTION" \
@@ -62,7 +64,7 @@ COPY package*.json ./
 # It also contains the extra packages required for Red Hat Enterprise Linux (RHEL) & CentOS
 #
 # Install as a separate step from the application dependencies
-RUN yum update -y && yum install -y epel-release centos-release-scl
+RUN yum update -y && yum install -y epel-release
 
 # Downgrade to node 8
 RUN rpm -Uvh --oldpackage https://rpm.nodesource.com/pub_8.x/el/7/x86_64/nodesource-release-el7-1.noarch.rpm
@@ -87,7 +89,6 @@ RUN yum install -y \
 #    nvm alias default $NODE_VERSION && \
 #    nvm use default" | bash
 
-
 # Install production dependencies.
 #RUN node -v
 #RUN npm -v
@@ -103,7 +104,7 @@ RUN npm install --only=production
 
 RUN echo $PATH
 
-RUN find / -name "node" && echo "======"
+#RUN find / -name "node" && echo "======"
 
 
 # Run the web service on container startup.
@@ -111,7 +112,7 @@ RUN find / -name "node" && echo "======"
 #sENTRYPOINT ["/nodetest"]
 
 #TODO switch to non-root user
-EXPOSE 8080
+EXPOSE 8000
 CMD [ "node", "index.js" ]
 #CMD ["sh","-c", "~/.nvm/versions/node/v8.9.3/bin/npm install"]
 #CMD ["sh","-c", "~/.nvm/versions/node/v8.9.3/bin/node index.js"]

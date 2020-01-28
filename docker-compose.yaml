@@ -1,0 +1,30 @@
+version: '2.4'
+services:
+  app:
+    build: ./images/caseinfo
+    image: djdrisco/docker-centos-caseinfo
+    depends_on:
+      - mongodb
+    #ports:
+    #   - 80:8000
+    environment:
+      - PORT=8000
+    expose:
+      - 8000
+    #volumes:
+    #  - ./images/caseinfo:/usr/src/app
+  mongodb:
+     build: ./images/mongodb
+     image: djdrisco/docker-mongodb
+     ports:
+       - 27017:27017
+     expose:
+       - 27017
+  nginx:
+     build: ./images/nginx
+     image: djdrisco/centos-nginx
+     depends_on:
+       - app
+     ports:
+       - 80:80
+
