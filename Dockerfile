@@ -25,33 +25,10 @@ LABEL summary="$SUMMARY" \
       name="centos/$NAME-$NODEJS_VERSION-centos7" \
       version="$NODEJS_VERSION" \
       maintainer="SoftwareCollections.org <sclorg@redhat.com>" \
-      help="For more information visit https://github.com/djdrisco/kubernetes-centos7-node" 
+      help="For more information visit https://github.com/djdrisco/kubernetes-centos7-node"
 
-
-#build from source
-#RUN yum -y update \
-#  && yum -y install centos-release-scl \
-#  && yum -y install which devtoolset-7-make devtoolset-7-gcc devtoolset-7-gcc-c++ \
-#  && curl -sL https://nodejs.org/dist/v8.9.1/node-v8.9.1.tar.gz | tar xz -C /tmp \
-#  && cd /tmp/node-v8.9.1 \
-#  && scl enable devtoolset-7 "./configure" \
-#  && scl enable devtoolset-7 "make -j $(nproc)" \
-#  && scl enable devtoolset-7 "make install" \
-#  && cd / \
-#  && node -v \
-#  && npm -v \
-#  && rm -rf /tmp/node* \
-#  && yum clean all \
-#  && rm -rf /var/cache/yum
-
-
-
-# works but installs version of node v6.17
-#RUN yum install -y epel-release \
-#  && yum install -y nodejs \
-#  && yum install -y  npm \
-#  && yum -y clean all --enablerepo='*'
-
+# # Replace shell with bash so we can source files
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 # Create and change to the app directory.
 WORKDIR /usr/src/app
@@ -62,30 +39,55 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 #use nvm
-
 ENV NODE_VERSION=8.9.3
 
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash \
   && source ~/.bash_profile \
   && nvm install $NODE_VERSION  \
   && nvm alias default $NODE_VERSION \
-   && nvm use $NODE_VERSION
+  && nvm use $NODE_VERSION
 
-ENV NODE_VERSION=8.9.3
+
 ENV NVM_DIR=~/.nvm
 ENV NODE_PATH=$NVM_DIR/versions/node/v$NODE_VERSION/lib/node_modules
 ENV PATH=$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
 
+#alterative
+#ENV NVM_VERSION v0.33.11
+#ENV NODE_VERSION v7.5.0
+#ENV NVM_DIR /usr/local/nvm
+#RUN mkdir $NVM_DIR
+#RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
+
+#ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
+#ENV PATH $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
+
+#RUN echo "source $NVM_DIR/nvm.sh && \
+#    nvm install $NODE_VERSION && \
+#    nvm alias default $NODE_VERSION && \
+#    nvm use default" | bash
+
+
 # Install production dependencies.
-#RUN npm install --only=production
+#RUN node -v
+#RUN npm -v
+#RUN ~/.nvm/versions/node/v8.9.3/bin/npm install --only=production
+
+RUN ~/.nvm/versions/node/v8.9.3/bin/node -v
+#issue here
+#RUN ~/.nvm/versions/node/v8.9.3/bin/npm -v
 
 # Copy local code to the container image.
-COPY . ./nodetest
+COPY . .
 
 
-#CMD ["sh","-c", "~/.nvm/versions/node/v8.9.3/bin/npm start"]
 
 # Run the web service on container startup.
-CMD [ "npm", "start" ]
-ENTRYPOINT ["./nodetest"]
+#CMD [ "npm", "start" ]
+#sENTRYPOINT ["/nodetest"]
+
+EXPOSE 8080
+CMD [ "node", "index.js" ]
+#CMD ["sh","-c", "~/.nvm/versions/node/v8.9.3/bin/npm install"]
+#CMD ["sh","-c", "~/.nvm/versions/node/v8.9.3/bin/node index.js"]
