@@ -39,18 +39,37 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 #use nvm
-ENV NODE_VERSION=8.9.3
+#ENV NODE_VERSION=8.9.3
 
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash \
-  && source ~/.bash_profile \
-  && nvm install $NODE_VERSION  \
-  && nvm alias default $NODE_VERSION \
-  && nvm use $NODE_VERSION
+#RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash \
+#  && source ~/.bash_profile \
+#  && nvm install $NODE_VERSION  \
+#  && nvm alias default $NODE_VERSION \
+#  && nvm use $NODE_VERSION
 
 
-ENV NVM_DIR=~/.nvm
-ENV NODE_PATH=$NVM_DIR/versions/node/v$NODE_VERSION/lib/node_modules
-ENV PATH=$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
+#ENV NVM_DIR=~/.nvm
+#ENV NODE_PATH=$NVM_DIR/versions/node/v$NODE_VERSION/lib/node_modules
+#ENV PATH=$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
+
+#newest
+# ------------------------------------------------------------------------------
+# Install the environment
+# ------------------------------------------------------------------------------
+
+# Update the repos and install Extra Packages for Enterprise Linux (EPEL)
+# It is a group that maintains the latest packages to their repository.
+# It also contains the extra packages required for Red Hat Enterprise Linux (RHEL) & CentOS
+#
+# Install as a separate step from the application dependencies
+RUN yum update -y && yum install -y epel-release centos-release-scl
+
+# Downgrade to node 8
+RUN rpm -Uvh --oldpackage https://rpm.nodesource.com/pub_8.x/el/7/x86_64/nodesource-release-el7-1.noarch.rpm
+
+# Install dependencies for the application
+RUN yum install -y \
+    nodejs
 
 
 #alterative
@@ -72,21 +91,26 @@ ENV PATH=$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 # Install production dependencies.
 #RUN node -v
 #RUN npm -v
-#RUN ~/.nvm/versions/node/v8.9.3/bin/npm install --only=production
 
-RUN ~/.nvm/versions/node/v8.9.3/bin/node -v
+#RUN ~/.nvm/versions/node/v8.9.3/bin/node -v
 #issue here
 #RUN ~/.nvm/versions/node/v8.9.3/bin/npm -v
 
 # Copy local code to the container image.
 COPY . .
 
+RUN npm install --only=production
+
+RUN echo $PATH
+
+RUN find / -name "node" && echo "======"
 
 
 # Run the web service on container startup.
 #CMD [ "npm", "start" ]
 #sENTRYPOINT ["/nodetest"]
 
+#TODO switch to non-root user
 EXPOSE 8080
 CMD [ "node", "index.js" ]
 #CMD ["sh","-c", "~/.nvm/versions/node/v8.9.3/bin/npm install"]

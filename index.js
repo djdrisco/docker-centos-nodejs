@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 
 app.get('/', (req, res) => {
-    console.log('Hello world k8n centos nodejs test received a request.');
+    console.log('Hello world centos nodejs test received a request.');
 
     const target = process.env.TARGET || 'World';
     res.send(`Hello ${target}!`);
